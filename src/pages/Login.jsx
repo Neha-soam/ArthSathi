@@ -1,7 +1,9 @@
 import { useState } from 'react'
 import { Link, Navigate, useLocation } from 'react-router-dom'
+import { ShieldCheck } from 'lucide-react'
 import { useAuth, emailSchema } from '../lib/auth.jsx'
 import { validatePassword } from '../lib/password'
+import Field from '../components/Field.jsx'
 
 const GENERIC_SIGNUP = 'We could not create an account with these details. If you may already have one, log in or reset your password.'
 export default function Login() {
@@ -32,17 +34,19 @@ export default function Login() {
   }
   return (
     <div className="flex min-h-screen items-center justify-center p-4">
-      <form onSubmit={submit} className="card w-full max-w-sm space-y-4">
-        <div><h1 className="text-2xl font-bold text-brand-700">ArthSathi</h1><p className="text-sm text-slate-500">Your AI financial companion</p></div>
-        <div><label className="label">Email</label><input className="input" type="email" autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} required /></div>
-        <div><label className="label">Password</label><input className="input" type="password" autoComplete={mode === 'login' ? 'current-password' : 'new-password'} value={password} onChange={(e) => setPassword(e.target.value)} required />
-          {mode === 'signup' && <p className="mt-1 text-xs text-slate-500">8+ characters with a letter and a number.</p>}
-          {mode === 'login' && <Link to="/forgot-password" className="mt-1 inline-block text-xs text-brand-700 underline">Forgot password?</Link>}</div>
-        {err && <p className="text-sm text-red-600" role="alert">{err}</p>}{info && <p className="text-sm text-brand-700">{info}</p>}
-        <button className="btn w-full" disabled={busy}>{busy ? 'Please wait…' : mode === 'login' ? 'Log in' : 'Create account'}</button>
-        <button type="button" className="w-full text-sm text-slate-600 underline" onClick={() => { setMode(mode === 'login' ? 'signup' : 'login'); setErr(''); setInfo('') }}>
-          {mode === 'login' ? 'New here? Create an account' : 'Have an account? Log in'}</button>
-      </form>
+      <div className="w-full max-w-sm space-y-4">
+        <div className="text-center"><h1 className="text-3xl font-bold text-brand-700">ArthSathi</h1><p className="mt-1 text-sm text-slate-600">Your AI financial companion for budgeting, tax, scams and learning to invest.</p></div>
+        <form onSubmit={submit} className="card space-y-4" noValidate>
+          <h2 className="text-lg font-semibold">{mode === 'login' ? 'Log in' : 'Create your account'}</h2>
+          <Field type="email" label="Email" value={email} onChange={setEmail} autoComplete="email" required />
+          <Field type="password" label="Password" value={password} onChange={setPassword} autoComplete={mode === 'login' ? 'current-password' : 'new-password'} required hint={mode === 'signup' ? '8+ characters with a letter and a number.' : undefined} />
+          {mode === 'login' && <Link to="/forgot-password" className="inline-block text-sm text-brand-700 underline">Forgot password?</Link>}
+          {err && <p className="text-sm text-red-600" role="alert">{err}</p>}{info && <p className="text-sm text-brand-700" role="status">{info}</p>}
+          <button className="btn w-full" disabled={busy}>{busy ? 'Please wait…' : mode === 'login' ? 'Log in' : 'Create account'}</button>
+          <button type="button" className="w-full text-sm text-slate-600 underline" onClick={() => { setMode(mode === 'login' ? 'signup' : 'login'); setErr(''); setInfo('') }}>{mode === 'login' ? 'New here? Create an account' : 'Have an account? Log in'}</button>
+        </form>
+        <p className="flex items-start justify-center gap-2 text-center text-xs text-slate-500"><ShieldCheck size={14} className="mt-0.5 shrink-0" aria-hidden="true" />Your records are private to your account. ArthSathi never asks for your UPI PIN, OTP or card details.</p>
+      </div>
     </div>
   )
 }

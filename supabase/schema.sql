@@ -98,3 +98,37 @@ alter table public.recurring_rules enable row level security;
 drop policy if exists "own rows" on public.recurring_rules;
 create policy "own rows" on public.recurring_rules for all to authenticated using (user_id = auth.uid()) with check (user_id = auth.uid());
 grant select, insert, update, delete on public.recurring_rules to authenticated;
+
+-- Phase 4: scam check history
+create table if not exists public.scam_checks (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references auth.users(id) on delete cascade default auth.uid(),
+  level text not null check (level in ('Low','Medium','High')),
+  score int not null check (score between 0 and 100),
+  signals text[] not null default '{}' check (cardinality(signals) <= 30),
+  excerpt text not null check (char_length(excerpt) <= 200),
+  ai_used boolean not null default false,
+  created_at timestamptz not null default now()
+);
+create index if not exists scam_checks_user_created on public.scam_checks (user_id, created_at desc);
+alter table public.scam_checks enable row level security;
+drop policy if exists "own rows" on public.scam_checks;
+create policy "own rows" on public.scam_checks for all to authenticated using (user_id = auth.uid()) with check (user_id = auth.uid());
+grant select, insert, delete on public.scam_checks to authenticated; -- no UPDATE: history entries are immutable
+
+-- Phase 5: paper trading log
+-- Holdings, cash and P&L are derived from this log. The older paper_portfolios table is left untouched and unused.
+create table if not exists public.paper_trades (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references auth.users(id) on delete cascade default auth.uid(),
+  symbol text not null check (symbol ~ '^[A-Za-z0-9.&-]{1,20}$'),
+  side text not null check (side in ('buy','sell')),
+  quantity int not null check (quantity > 0 and quantity <= 1000000),
+  price numeric(14,2) not null check (price > 0 and price < 1000000000),
+  created_at timestamptz not null default now()
+);
+create index if not exists paper_trades_user_created on public.paper_trades (user_id, created_at);
+alter table public.paper_trades enable row level security;
+drop policy if exists "own rows" on public.paper_trades;
+create policy "own rows" on public.paper_trades for all to authenticated using (user_id = auth.uid()) with check (user_id = auth.uid());
+grant select, insert, delete on public.paper_trades to authenticated; -- no UPDATE: trades are immutable; "reset" deletes them

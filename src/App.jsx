@@ -1,22 +1,24 @@
+import { lazy } from 'react'
 import { Navigate, Route, Routes } from 'react-router-dom'
 import { useAuth } from './lib/auth.jsx'
 import { configured } from './lib/supabase'
 import Layout from './components/Layout.jsx'
+import { PageSkeleton } from './components/Skeleton.jsx'
 import Login from './pages/Login.jsx'
 import Dashboard from './pages/Dashboard.jsx'
-import Budgeting from './pages/Budgeting.jsx'
-import Scam from './pages/Scam.jsx'
-import Invest from './pages/Invest.jsx'
-import Tax from './pages/Tax.jsx'
-import Market from './pages/Market.jsx'
-import Business from './pages/Business.jsx'
-import Profile from './pages/Profile.jsx'
+const Budgeting = lazy(() => import('./pages/Budgeting.jsx')) // loaded on demand: keeps the first screen fast on mobile data
+const Scam = lazy(() => import('./pages/Scam.jsx')) // loaded on demand: keeps the first screen fast on mobile data
+const Invest = lazy(() => import('./pages/Invest.jsx')) // loaded on demand: keeps the first screen fast on mobile data
+const Tax = lazy(() => import('./pages/Tax.jsx')) // loaded on demand: keeps the first screen fast on mobile data
+const Market = lazy(() => import('./pages/Market.jsx')) // loaded on demand: keeps the first screen fast on mobile data
+const Business = lazy(() => import('./pages/Business.jsx')) // loaded on demand: keeps the first screen fast on mobile data
+const Profile = lazy(() => import('./pages/Profile.jsx')) // loaded on demand: keeps the first screen fast on mobile data
 import ForgotPassword from './pages/ForgotPassword.jsx'
 import ResetPassword from './pages/ResetPassword.jsx'
 
 function Protected({ children }) {
   const { user, loading, recovery } = useAuth()
-  if (loading) return <div className="p-8 text-slate-500">Loading…</div>
+  if (loading) return <div className="mx-auto max-w-5xl p-6"><PageSkeleton /></div>
   if (user && recovery) return <Navigate to="/reset-password" replace /> // recovery session may only set a new password
   return user ? children : <Navigate to="/login" replace />
 }

@@ -1,31 +1,7 @@
 // Pure logic for the AI function (no Deno or network imports) so it can be unit-tested with a mocked fetch.
 
-export const LEVELS = ["Potentially Safe", "Suspicious", "High Risk"] as const;
-
-// ---- Scam rules (run first; also the fallback if AI is down) ----
-const RULES: { re: RegExp; w: number; flag: string }[] = [
-  { re: /\b(otp|one[- ]time password|verification code)\b/i, w: 2, flag: "Mentions an OTP/verification code. Genuine banks never ask you to share it." },
-  { re: /\b(upi pin|mpin|cvv|card number|net ?banking password|atm pin|password)\b/i, w: 3, flag: "Asks for a PIN, CVV or password. No legitimate service asks for these." },
-  { re: /\b(urgent|immediately|within \d+ ?(hours?|mins?|minutes?)|last chance|expires? today|act now|final notice)\b/i, w: 2, flag: "Uses urgency or pressure to rush you." },
-  { re: /\b(kyc|account (will be )?(blocked|suspended|frozen|closed)|pan (card )?(update|expired))\b/i, w: 2, flag: "Fake KYC/account-block threat, a very common scam pattern." },
-  { re: /\b(lottery|lucky draw|you have won|prize|cashback of|reward points? (expire|redeem))\b/i, w: 2, flag: "Prize, lottery or reward bait." },
-  { re: /\b(guaranteed returns?|double your money|risk[- ]free profit|assured profit|\d{2,}% (daily|weekly|monthly) returns?)\b/i, w: 3, flag: "Promises guaranteed or unrealistic returns." },
-  { re: /\b(anydesk|teamviewer|quicksupport|screen ?share|remote access)\b/i, w: 3, flag: "Asks you to install a remote-access app, which lets scammers see your screen." },
-  { re: /\b(collect request|request money|scan (this )?qr (code )?to receive|enter (your )?pin to receive)\b/i, w: 3, flag: "UPI trick: you never need to enter a PIN or scan a QR to RECEIVE money." },
-  { re: /\b(bit\.ly|tinyurl|t\.co|cutt\.ly|rb\.gy|is\.gd|goo\.gl)\//i, w: 2, flag: "Uses a shortened link that hides the real destination." },
-  { re: /https?:\/\/\d{1,3}(\.\d{1,3}){3}/i, w: 3, flag: "Link points to a raw IP address instead of a real website." },
-  { re: /\b(send|pay|transfer) (a )?(small |registration |processing )?(fee|deposit|amount) (to|first)\b/i, w: 2, flag: "Asks for an upfront fee before giving something." },
-];
-const LINK_RE = /(https?:\/\/[^\s<>"']+|www\.[^\s<>"']+)/gi;
-
-export function ruleScan(text: string) {
-  let score = 0; const flags: string[] = [];
-  for (const r of RULES) if (r.re.test(text)) { score += r.w; flags.push(r.flag); }
-  const links = [...new Set(text.match(LINK_RE) ?? [])].slice(0, 10);
-  if (links.length && !flags.length) { score += 1; flags.push("Contains a link. Verify the sender before ever opening it."); }
-  const level = score >= 5 ? 2 : score >= 2 ? 1 : 0;
-  return { level, flags, links };
-}
+import { LEVELS } from "./scam.ts";
+export { LEVELS };
 
 // ---- Gemini ----
 export type GeminiErrorKind = "no_key" | "auth" | "quota" | "blocked" | "truncated" | "empty" | "not_found" | "http" | "timeout";

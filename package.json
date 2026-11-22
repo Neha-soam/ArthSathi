@@ -7,9 +7,9 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "test": "node --test src/lib/tax.test.js src/lib/password.test.js src/lib/dberror.test.js src/lib/recovery.test.js src/lib/finance.test.js src/lib/budgeting.test.js && npm run test:ai",
+    "test": "node --test src/lib/tax.test.js src/lib/password.test.js src/lib/dberror.test.js src/lib/recovery.test.js src/lib/finance.test.js src/lib/budgeting.test.js src/lib/scam.test.js src/lib/ui.test.js src/lib/invest.test.js src/lib/market_biz.test.js && npm run test:ai",
     "test:e2e": "node scripts/e2e.mjs",
-    "test:ai": "node --experimental-strip-types --test supabase/functions/ai/logic.test.ts",
+    "test:ai": "node --experimental-strip-types --test supabase/functions/ai/logic.test.ts supabase/functions/ai/scam.test.ts",
     "test:smoke": "node scripts/smoke-ai.mjs"
   },
   "dependencies": {

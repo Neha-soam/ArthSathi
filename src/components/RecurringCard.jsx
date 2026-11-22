@@ -7,10 +7,11 @@ import { inr } from '../lib/format'
 import { describeDbError } from '../lib/dberror'
 import { localDateString } from '../lib/dates'
 import { generateRecurring } from '../lib/recurringDb'
+import { useToast } from './Toast.jsx'
 
 const blank = { type: 'expense', amount: '', category: 'Bills', day: '1', note: '' }
 export default function RecurringCard({ onChanged }) {
-  const { user } = useAuth()
+  const { user } = useAuth(), toast = useToast()
   const [rules, setRules] = useState([]); const [f, setF] = useState(blank); const [err, setErr] = useState(''); const [setup, setSetup] = useState(false); const [busy, setBusy] = useState(false)
   const load = useCallback(async () => {
     const { data, error } = await supabase.from('recurring_rules').select('*').order('created_at')
@@ -26,14 +27,14 @@ export default function RecurringCard({ onChanged }) {
     setBusy(true)
     const { error } = await supabase.from('recurring_rules').insert({ user_id: user.id, type: f.type, amount, category: f.category, note: f.note.trim() || null, day_of_month: day, start_date: localDateString() })
     if (error) { setBusy(false); console.error(error); return setErr(describeDbError(error, 'save')) }
-    setF(blank); await generateRecurring(user.id, true); setBusy(false); await load(); onChanged()
+    setF(blank); await generateRecurring(user.id, true); setBusy(false); toast.success('Recurring transaction added'); await load(); onChanged()
   }
   async function toggle(r) { await supabase.from('recurring_rules').update({ active: !r.active }).eq('id', r.id); await load() }
   async function remove(r) {
     if (!confirm('Delete this recurring rule? Transactions it already created will stay.')) return
     const { error } = await supabase.from('recurring_rules').delete().eq('id', r.id)
     if (error) return setErr(describeDbError(error, 'delete'))
-    await load(); onChanged()
+    toast.success('Recurring rule deleted'); await load(); onChanged()
   }
   return (
     <div className="card"><h3 className="mb-1 flex items-center gap-2 font-semibold"><Repeat size={16} className="text-brand-600" />Recurring transactions</h3>

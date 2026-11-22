@@ -2,6 +2,8 @@
 
 AI-powered financial companion for Indian users. React + Vite + Tailwind, Supabase (Auth, Postgres, Edge Functions), Gemini API.
 
+> Deploying to the internet: see DEPLOY.md.
+
 ## Setup
 1. `npm install`
 2. Create a Supabase project. In **SQL Editor**, run `supabase/schema.sql`.
@@ -27,13 +29,20 @@ AI-powered financial companion for Indian users. React + Vite + Tailwind, Supaba
 - `SUPABASE_URL=... SUPABASE_ANON_KEY=... npm run test:e2e`: live signup/login/duplicate/password/RLS isolation test against your project.
 - `supabase/audit.sql`: lists RLS status and policies.
 
+## Database updates (run once each in the Supabase SQL Editor, in this order)
+`supabase/schema.sql` (fresh setup, includes everything below) or, for an existing project: `fix_permissions.sql`, `phase3_recurring.sql`, `phase4_scam_history.sql`, `phase5_paper_trades.sql`. Then `supabase/audit.sql` to confirm RLS and policies.
+
 ## Status
 | Module | State |
 |---|---|
-| Auth, dashboard, budgeting, scam detector | Built |
-| Investment guide, tax assistant, business calculators | Built (calculators + AI Q&A) |
-| Market insights | Watchlist + glossary only. No price data feed, no paper portfolio yet |
-| Business tracking (persistent revenue/expense) | Not built |
-| Savings goals UI | Table exists, UI not built |
+| Auth, dashboard | Built |
+| Smart Budgeting | Built: search/filters, budgets, alerts, monthly report, CSV export, recurring, explained insights |
+| Scam Detector | Built: Low/Medium/High, highlighted phrases, explainable score, samples, masked history |
+| Investment Guide | Built: product guides, comparison, SIP / lump sum / RD calculators (hypothetical), AI Q&A |
+| Tax Assistant | Built: old vs new regime with slab breakdown, caps, age, HRA helper (FY 2026-27, educational) |
+| Market Insights | **Simulated demo data only** (fictional instruments, labelled). Watchlist, charts, paper trading. No real market feed |
+| Business Finance | Built: GST calculator and sample invoice, loan EMI with schedule, profit and cash flow. Not saved to the database |
 
-Not yet run end-to-end against a live Supabase project. Test checklist: sign up → add transactions → set budget → run scam check → compare tax.
+Real market data would need a provider API key and a server-side proxy (an Edge Function). It is intentionally not included.
+
+Not yet run end-to-end against a live Supabase project. Test checklist: sign up, add transactions, set a budget, run a scam check, compare tax, place a paper trade.

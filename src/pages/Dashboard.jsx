@@ -2,12 +2,15 @@ import { Link } from 'react-router-dom'
 import { inr } from '../lib/format'
 import { budgetUsage, monthKey, summarize, useFinance } from '../lib/useFinance'
 import { NAV } from '../components/Layout.jsx'
+import { Wallet } from 'lucide-react'
 import ErrorCard from '../components/ErrorCard.jsx'
+import EmptyState from '../components/EmptyState.jsx'
+import { PageSkeleton } from '../components/Skeleton.jsx'
 
 export default function Dashboard() {
   const { tx, budgets, loading, error, truncated, reload } = useFinance()
-  if (loading) return <p className="text-slate-500">Loading your data…</p>
-  if (error) return <div className="space-y-6"><h1 className="text-2xl font-bold">Dashboard</h1><ErrorCard error={error} onRetry={reload} /></div>
+  if (loading) return <PageSkeleton />
+  if (error) return <div className="space-y-6"><h1 className="page-title">Dashboard</h1><ErrorCard error={error} onRetry={reload} /></div>
   // Same functions as the Budgeting page, so both pages always show identical numbers.
   const s = summarize(tx, monthKey())
   const u = budgetUsage(budgets, s.byCat)
@@ -19,7 +22,7 @@ export default function Dashboard() {
     ['Savings rate (this month)', s.savingsRate === null ? '—' : s.savingsRate + '%', s.savingsRate !== null && s.savingsRate < 0 ? 'text-red-600' : ''],
   ]
   return (
-    <div className="space-y-6"><h1 className="text-2xl font-bold">Dashboard</h1>
+    <div className="space-y-6"><h1 className="page-title">Dashboard</h1>
       {truncated && <div className="card border-amber-300 bg-amber-50 text-sm text-amber-900">You have a very large number of transactions. Only the most recent 10,000 are included, so totals may be incomplete.</div>}
       <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
         {cards.map(([l, v, c]) => (<div key={l} className="card"><div className="text-xs text-slate-500">{l}</div><div className={`text-xl font-semibold ${c}`}>{v}</div></div>))}
@@ -33,7 +36,7 @@ export default function Dashboard() {
           {u.overCount > 0 && <p className="mt-1 text-sm text-red-600">{u.overCount} categor{u.overCount > 1 ? 'ies are' : 'y is'} over budget. <Link className="underline" to="/budgeting">Review</Link></p>}
         </> : <p className="text-sm text-slate-500">No budgets yet. <Link className="underline" to="/budgeting">Set one</Link>.</p>}</div>
       <div className="card"><h3 className="mb-2 font-semibold">Recent transactions</h3>
-        {tx.length === 0 ? <p className="text-sm text-slate-500">Nothing yet. <Link className="underline" to="/budgeting">Add your first transaction</Link>.</p> :
+        {tx.length === 0 ? <EmptyState icon={Wallet} title="No transactions yet" action={<Link className="btn" to="/budgeting">Add your first transaction</Link>}>Track your income and spending to see your balance, savings rate and budget progress here.</EmptyState> :
           <ul className="divide-y">{tx.slice(0, 5).map((t) => <li key={t.id} className="flex justify-between py-2 text-sm"><span>{t.category}{t.note ? ` · ${t.note}` : ''} <span className="text-xs text-slate-500">{t.date}</span></span><span>{t.type === 'income' ? '+' : '-'}{inr(t.amount)}</span></li>)}</ul>}</div>
       <div className="grid grid-cols-2 gap-3 md:grid-cols-3">{NAV.slice(1, 7).map(([to, label, Icon]) => (
         <Link key={to} to={to} className="card flex items-center gap-3 hover:border-brand-600"><Icon className="text-brand-600" size={20} />{label}</Link>))}</div>

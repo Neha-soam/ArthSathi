@@ -30,6 +30,7 @@ export function AuthProvider({ children }) {
     signUp: ({ email, password }) => supabase.auth.signUp({ email, password, options: { emailRedirectTo: window.location.origin } }),
     signIn: ({ email, password }) => supabase.auth.signInWithPassword({ email, password }),
     signOut: () => supabase.auth.signOut(),
+    signOutAll: () => supabase.auth.signOut({ scope: 'global' }), // ends the session on every device
     requestReset: (email) => supabase.auth.resetPasswordForEmail(email, { redirectTo: `${window.location.origin}/reset-password` }),
     // Recovery flow: set the new password, then end ALL sessions so the user logs in fresh.
     completeReset: async (password) => {
