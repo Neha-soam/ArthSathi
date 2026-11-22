@@ -1,0 +1,31 @@
+{
+  "name": "arthsathi",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "test": "node --test src/lib/tax.test.js src/lib/password.test.js src/lib/dberror.test.js src/lib/recovery.test.js src/lib/finance.test.js src/lib/budgeting.test.js && npm run test:ai",
+    "test:e2e": "node scripts/e2e.mjs",
+    "test:ai": "node --experimental-strip-types --test supabase/functions/ai/logic.test.ts",
+    "test:smoke": "node scripts/smoke-ai.mjs"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.45.0",
+    "lucide-react": "^0.460.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-router-dom": "^6.28.0",
+    "recharts": "^2.13.0",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.3.3",
+    "autoprefixer": "^10.4.20",
+    "postcss": "^8.4.47",
+    "tailwindcss": "^3.4.14",
+    "vite": "^5.4.10"
+  }
+}
